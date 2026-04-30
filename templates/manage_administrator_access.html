@@ -1,0 +1,614 @@
+{% extends "base.html" %}
+
+{% block title %}Enroll New User Form{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-shield-exclamation display-3 text-warning mb-3"></i>
+                    <h4 class="fw-bold text-dark">Missing Information</h4>
+                    <p id="validationMessage" class="text-muted px-3"></p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-5 fw-bold"
+                        data-bs-dismiss="modal">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row align-items-center g-3 mb-3 border-bottom pb-3">
+        <div class="col-md-4">
+            <h4 class="mb-0" style="color: #0b4486;"><i class="bi bi-pencil-square me-2"></i>Modify Administrator Access
+            </h4>
+        </div>
+        <div class="col-md-8 text-md-end">
+            <a id="btn_cancel" href="/administrator_home" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi bi-x-lg me-2"></i>Cancel
+            </a>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills nav-justified mb-4" id="wizardTab" role="tablist">
+        <li class="nav-item">
+            <button
+                class="nav-link {{ 'active' if active_step == 'step1-tab' or active_step is none or active_step == '' }} rounded-pill"
+                id="step1-tab" type="button">1. Ticket Info</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link {{ 'active' if active_step == 'step2-tab' }} rounded-pill" id="step2-tab"
+                type="button">2. User Details</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link {{ 'active' if active_step == 'step3-tab' }} rounded-pill" id="step3-tab"
+                type="button">3. Summary</button>
+        </li>
+    </ul>
+
+    <div class="tab-content border rounded p-4 bg-white shadow-sm" id="wizardTabContent">
+
+        <div class="tab-pane {{ 'show active' if active_step == 'step1-tab' or active_step is none or active_step == '' }} fade"
+            id="step1" role="tabpanel">
+            <div class="row justify-content-center py-5">
+                <div class="col-md-6 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-ticket-perforated-fill display-1 text-primary opacity-25"></i>
+                    </div>
+                    <h5>Enter Audit Information</h5>
+                    <p class="text-muted small">Please provide the Manage Engine ticket number associated with this
+                        request.</p>
+                    <div class="text-start mt-4">
+                        <label for="txt_ticket_num" class="form-label fw-bold">Source Ticket # <span
+                                class="text-danger">*</span></label>
+                        <input type="text" id="txt_ticket_num" class="form-control form-control-lg shadow-sm"
+                            placeholder="Enter ME ticket number..." value="{{ ticket_num if ticket_num }}">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 text-end">
+                <button type="button" class="btn btn-primary px-4 rounded-pill btn-next">Next <i
+                        class="bi bi-arrow-right ms-2"></i></button>
+            </div>
+        </div>
+
+        <div class="tab-pane {{ 'show active' if active_step == 'step2-tab' }} fade" id="step2" role="tabpanel">
+            <h5><i class="bi bi-person me-2"></i>User Details</h5>
+            <div class="row g-3 mt-2">
+                <!-- <div class="col-md-12">
+                    <label class="fw-bold">Search Employee ID</label>
+                    <div class="input-group mt-1">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 rounded-end-pill"
+                            placeholder="Input ID and press Enter" id="employeeSearch"
+                            value="{{ employee_id if employee_id }}">
+                    </div>
+                </div> -->
+                {% if result %}
+                {% for res in result %}
+                {% if res.hcm_id %}
+                <input type="hidden" id="hidden_emp_id" value="{{ res.hcm_id }}">
+                {% endif %}
+
+                <div class="col-md-6">
+                    <label class="fw-bold">Full Name</label>
+                    <input readonly type="text" id="txt_full_name" class="form-control bg-light"
+                        value="{{ res.full_name if res.full_name }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold">User Email</label>
+                    <input readonly type="text" id="txt_user_email" class="form-control bg-light"
+                        value="{{ res.email if res.email }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="fw-bold">SBU</label>
+                    <input readonly type="text" id="txt_sbu" class="form-control bg-light"
+                        value="{{ res.sbu if res.sbu }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="fw-bold">Position</label>
+                    <input readonly type="text" id="txt_position" class="form-control bg-light"
+                        value="{{ res.job_position if res.job_position }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold">Role</label>
+                    <!-- <input readonly type="text" id="txt_role" class="form-control bg-light"
+                        value="{{ emp_role if emp_role }}"> -->
+                    <span>
+                        <select id="dd_role" name="Role" class="form-select" required>
+                            <option value=""></option>
+                            <option value="Administrator" {% if res.role_type=="Administrator" %}selected{% endif %}>
+                                Administrator</option>
+                            <option value="Super Administrator" {% if res.role_type=="Super Administrator" %}selected{%
+                                endif %}>Super Administrator</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="col-md-3">
+                    <label class="fw-bold">Effective From <span class="text-danger">*</span></label>
+                    <input type="date" id="date_effective_from" class="form-control mt-1" value="{{ res.start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="fw-bold">Effective To <span class="text-danger">*</span></label>
+                    <input type="date" id="date_effective_to" class="form-control mt-1" value="{{ res.end_date }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold" for="dd_status">Status <span class="text-danger">*</span></label>
+                    <select class="form-select mt-1" id="dd_status">
+                        <option value="true" {% if res.status %}selected{% endif %}>Active</option>
+                        <option value="false" {% if not res.status %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div class="mt-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill btn-prev">Previous</button>
+                <button type="button" class="btn btn-primary px-4 rounded-pill btn-next">Next <i
+                        class="bi bi-arrow-right ms-2"></i></button>
+            </div>
+        </div>
+
+        <div class="tab-pane {{ 'show active' if active_step == 'step3-tab' }} fade" id="step3" role="tabpanel">
+            <h5 class="mb-4"><i class="bi bi-check2-all me-2"></i>Final Review</h5>
+            <div class="card border-0 bg-light mb-4 shadow-sm">
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <small class="text-muted text-uppercase fw-bold d-block">Ticket Reference</small>
+                            <span id="sum_ticket" class="fs-5 fw-bold text-dark">--</span>
+                        </div>
+                        <div class="col-md-3 border-start ps-4">
+                            <small class="text-muted text-uppercase fw-bold d-block">Employee Name</small>
+                            <span id="sum_user" class="fs-5 fw-bold text-dark">--</span>
+                            <div class="pt-2 border-top mt-2">
+                                <small class="text-muted text-uppercase fw-bold d-block">Email Address:</small>
+                                <span id="sum_email" class="text-primary small">--</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 border-start ps-4">
+                            <small class="text-muted text-uppercase fw-bold d-block">SBU & Position</small>
+                            <span id="sum_sbu_pos" class="d-block fw-bold text-dark">--</span>
+                            <div class="pt-2 border-top mt-2">
+                                <small class="text-muted text-uppercase fw-bold d-block">Role:</small>
+                                <span id="sum_role" class="text-dark">--</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 border-start ps-4">
+                            <small class="text-muted text-uppercase fw-bold d-block">Global Effectivity</small>
+                            <span id="sum_dates" class="d-block fw-bold text-dark small">--</span>
+                            <div class="pt-2 border-top mt-2">
+                                <small class="text-muted text-uppercase fw-bold d-block">User Status</small>
+                                <span id="sum_status" class="badge rounded-pill">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-between pt-3 border-top">
+                <button type="button" class="btn btn-outline-secondary px-4 rounded-pill btn-prev"><i
+                        class="bi bi-arrow-left me-2"></i>Go Back</button>
+                <button type="button" id="lnk_btn_save" class="btn btn-success px-5 rounded-pill shadow-sm"
+                    onclick="insert_enroll_administrator()"><i class="bi bi-check-circle me-2"></i>Confirm & Enroll
+                    User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="modal fade" id="refreshNotif" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 text-center py-5">
+            <div class="mb-4">
+                <img src="{{ url_for('static', filename='images/search2.gif') }}" alt="Searching..."
+                    style="width: 50px;">
+            </div>
+            <h5 class="fw-semibold">Searching Employee</h5>
+            <p class="text-muted small">Please wait while we fetch the details...</p>
+        </div>
+    </div>
+</div> -->
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-circle-fill me-2"></i>Not Found</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3"><i class="bi bi-person-fill-x display-4 text-danger"></i></div>
+                <h4 class="fw-bold">Employee ID not found</h4>
+                <p class="text-muted">Please check the ID and try again.</p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pb-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-5 fw-bold"
+                    data-bs-dismiss="modal">Got it</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="savingModal" tabindex="-1" aria-labelledby="savingModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+
+            <!-- Spinner -->
+            <div class="mb-3">
+                <div class="spinner-border text-primary" role="status" style="width:4rem; height:4rem;">
+                    <span class="visually-hidden">Saving...</span>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h4 class="fw-bold mb-2" id="savingModalTitle" style="color:#0b4486;">Saving User Access</h4>
+
+            <!-- Message -->
+            <p class="text-secondary mb-0 fs-6" id="savingModalMessage">
+                Please wait while the system securely saves user access.
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+
+            <!-- Header -->
+            <div class="modal-header border-0 bg-success bg-opacity-10">
+                <h5 class="modal-title fw-semibold" id="successModalLabel">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    System Confirmation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-check2-circle display-3 text-success"></i>
+                </div>
+
+                <h4 class="fw-bold mb-2 text-success">
+                    User Access Saved Successfully
+                </h4>
+
+                <p class="text-muted mb-0 fs-6">
+                    The user access information has been securely stored in the system.
+                    You may proceed with additional configurations or close this window.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer justify-content-center border-0 pb-4">
+                <!-- <button type="button" class="btn btn-success rounded-pill px-4">
+                        View Details
+                    </button> -->
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="errorNotif" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger"><i class="bi bi-bug-fill me-2"></i>Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3"><i class="bi bi-person-fill-x display-4 text-danger"></i></div>
+                <h4 class="fw-bold">Saving Failed</h4>
+                <p class="text-muted">Failed to create employee access. Please check the details and try again.</p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pb-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-5 fw-bold"
+                    data-bs-dismiss="modal">Got it</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. Helper: Change Tabs Safely ---
+    function setActiveTab(tabId) {
+        document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+
+        const targetBtn = document.getElementById(tabId);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+
+            const targetPaneId = tabId.replace('-tab', '');
+            const targetPane = document.getElementById(targetPaneId);
+
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+        }
+
+        if (tabId === 'step3-tab') updateSummary();
+    }
+
+    // --- 2. Employee Search (Triggers Reload but keeps Step 2) ---
+    // document.getElementById('employeeSearch').addEventListener('keydown', function (e) {
+    //     if (e.key === 'Enter') {
+    //         e.preventDefault();
+
+    //         let empId = this.value.trim();
+    //         let ticketNum = document.getElementById('txt_ticket_num').value.trim();
+
+    //         if (empId) {
+    //             const searchModal = new bootstrap.Modal(document.getElementById('refreshNotif'));
+    //             searchModal.show();
+
+    //             const baseUrl = "{{ url_for('search_hcm_id') }}";
+
+    //             window.location.href =
+    //                 `${baseUrl}?employee_id=${encodeURIComponent(empId)}&active_step=step2-tab&ticket_num=${encodeURIComponent(ticketNum)}`;
+    //         }
+    //     }
+    // });
+
+    // --- 3. Navigation Logic ---
+    function validateAndNavigate(targetTabId) {
+        const activeTab = document.querySelector('.nav-link.active');
+        const steps = ['step1-tab', 'step2-tab', 'step3-tab'];
+
+        const currentIndex = steps.indexOf(activeTab ? activeTab.id : 'step1-tab');
+        const targetIndex = steps.indexOf(targetTabId);
+
+        // Allow backward navigation freely
+        if (targetIndex <= currentIndex) {
+            setActiveTab(targetTabId);
+            return;
+        }
+
+        // Step 1 validation
+        if (currentIndex === 0 && !document.getElementById('txt_ticket_num').value.trim()) {
+            showValidationError("Please enter a <b>Ticket Number</b>.");
+            return;
+        }
+
+        // Step 2 validation
+        if (currentIndex === 1 && !document.getElementById('txt_user_email').value) {
+            showValidationError("Please <b>Search</b> an employee first.");
+            return;
+        }
+        if (currentIndex === 1 && !document.getElementById('dd_role').value) {
+            showValidationError("Please select user <b>Role</b>.");
+            return;
+        }
+        if (currentIndex === 1 && (!document.getElementById('date_effective_from').value || !document.getElementById('date_effective_to').value)) {
+            console.log(currentIndex)
+            showValidationError("Please set <b>Access Effectivity Date</b>.");
+            return;
+        }
+
+        setActiveTab(targetTabId);
+    }
+
+    // --- 4. Initialization (IMPORTANT FIX) ---
+    document.addEventListener('DOMContentLoaded', function () {
+        const serverStep = "{{ active_step or '' }}";
+
+        if (serverStep === 'step2-tab') {
+            setActiveTab('step2-tab');
+        } else if (serverStep === 'step3-tab') {
+            setActiveTab('step3-tab');
+        } else {
+            setActiveTab('step1-tab');
+        }
+
+        ['dd_role', 'date_effective_from', 'date_effective_to', 'dd_status']
+            .forEach(id => {
+                document.getElementById(id).addEventListener('change', updateSummary);
+            });
+    });
+
+    // --- 5. Event Listeners ---
+    document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            validateAndNavigate(tab.id);
+        });
+    });
+
+    document.querySelectorAll('.btn-next').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const activeTab = document.querySelector('.nav-link.active');
+            const nextLi = activeTab.parentElement.nextElementSibling;
+
+            if (nextLi) {
+                const nextTabId = nextLi.querySelector('.nav-link').id;
+                validateAndNavigate(nextTabId);
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-prev').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const activeTab = document.querySelector('.nav-link.active');
+            const prevLi = activeTab.parentElement.previousElementSibling;
+
+            if (prevLi) {
+                const prevTabId = prevLi.querySelector('.nav-link').id;
+                setActiveTab(prevTabId);
+            }
+        });
+    });
+
+    // --- 6. Validation Modal ---
+    function showValidationError(message) {
+        document.getElementById('validationMessage').innerHTML = message;
+        new bootstrap.Modal(document.getElementById('validationModal')).show();
+    }
+
+    // --- 7. Summary ---
+    function updateSummary() {
+        // ✅ Ticket Number
+        document.getElementById('sum_ticket').innerText =
+            document.getElementById('txt_ticket_num').value || '--';
+
+        // ✅ Employee Info
+        document.getElementById('sum_user').innerText =
+            document.getElementById('txt_full_name').value || '--';
+
+        document.getElementById('sum_email').innerText =
+            document.getElementById('txt_user_email').value || '--';
+
+        // ✅ SBU + Position
+        const sbu = document.getElementById('txt_sbu').value || '--';
+        const pos = document.getElementById('txt_position').value || '--';
+        document.getElementById('sum_sbu_pos').innerText = `${sbu} / ${pos}`;
+
+        // ✅ FIXED: Role (from dropdown)
+        const role = document.getElementById('dd_role').value || '--';
+        document.getElementById('sum_role').innerText = role;
+
+        // ✅ Dates (you had UI but no logic before)
+        const from = document.getElementById('date_effective_from').value;
+        const to = document.getElementById('date_effective_to').value;
+
+        document.getElementById('sum_dates').innerText =
+            (from && to) ? `${from} → ${to}` : '--';
+
+        // ✅ Status
+        const status = document.getElementById('dd_status').value;
+        const badge = document.getElementById('sum_status');
+
+        badge.innerText = status === 'true' ? 'Active' : 'Inactive';
+        badge.className =
+            status === 'true'
+                ? 'badge rounded-pill bg-success'
+                : 'badge rounded-pill bg-danger';
+    }
+
+    window.addEventListener('load', () => {
+        {% if employee_not_found %} new bootstrap.Modal(document.getElementById('errorModal')).show(); {% endif %}
+
+        // const is_user_exist = document.getElementById('is_user_exist').value;
+        // const txt_full_name = document.getElementById('txt_full_name');
+        // const txt_user_email = document.getElementById('txt_user_email');
+        // const existModal = new bootstrap.Modal(document.getElementById('userExistModal'));
+        // if (is_user_exist) {
+        //     existModal.show();
+        //     txt_full_name.value = "";
+        //     txt_user_email.value = "";
+        // }
+
+    });
+</script>
+
+<script>
+    function insert_enroll_administrator() {
+        if (!confirm("Are you sure you want to save this user access?")) {
+            return;
+        }
+
+        const hcm_id = document.getElementById('hidden_emp_id').value;
+        const full_name = document.getElementById('txt_full_name').value;
+        const email = document.getElementById('txt_user_email').value;
+        const role_type = document.getElementById('dd_role').value;
+        const sbu = document.getElementById('txt_sbu').value;
+        const job_position = document.getElementById('txt_position').value;
+        const ticket_number = document.getElementById('txt_ticket_num').value;
+        const access_start_date = document.getElementById('date_effective_from').value;
+        const access_end_date = document.getElementById('date_effective_to').value;
+        const access_status = document.getElementById('dd_status').value;
+
+        const successNotif = new bootstrap.Modal(document.getElementById('successModal'));
+        const errorNotif = new bootstrap.Modal(document.getElementById('errorNotif'));
+        const savingNotif = new bootstrap.Modal(document.getElementById('savingModal'));
+
+        const lnk_btn_save = document.getElementById('lnk_btn_save');
+        const lnk_btn_cancel = document.getElementById('btn_cancel');
+
+        savingNotif.show();
+
+        const data = {
+            hcm_id: hcm_id,
+            email: email,
+            full_name: full_name,
+            sbu: sbu,
+            role_type: role_type,
+            job_position: job_position,
+            ticket_number: ticket_number,
+            access_start_date: access_start_date,
+            access_end_date: access_end_date,
+            mode: 'update',
+            status: access_status,
+            created_by: "{{ user.email }}"
+        }
+
+        fetch('/insert_enroll_administrator', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            // .then(response => response.json())
+            .then((response) => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.message);
+
+                if (data.status === 'success') {
+                    savingNotif.hide();
+                    successNotif.show();
+                    lnk_btn_save.classList.add('d-none');
+                    lnk_btn_cancel.innerHTML = '<i class="bi bi-x-lg me-2"></i>Close';
+                } else if (data.status === 'error') {
+                    savingNotif.hide();
+                    errorNotif.show();
+
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                savingNotif.hide();
+                errorNotif.show();
+            });
+    }
+</script>
+
+<style>
+    .nav-pills .nav-link {
+        color: #495057 !important;
+        background: #ffffff;
+        margin: 0 5px;
+        border: 1px solid #dee2e6;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: #0b4486 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(11, 68, 134, 0.25);
+    }
+
+    .tab-pane h5 {
+        color: #0b4486;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

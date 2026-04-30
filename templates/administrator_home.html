@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Enroll New User Form{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="row align-items-center g-3 mb-3 border-bottom pb-3">
+        <div class="col-12 col-md-4">
+            <h4 class="mb-0" style="color: #0b4486;"><i class="bi bi-person-add me-2"></i>Administrator Master List</h4>
+        </div>
+        <div class="col-12 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 rounded-start-pill">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0 rounded-end-pill" id="searchModule"
+                    placeholder="Search existing user...">
+            </div>
+        </div>
+        <div class="col-12 col-md-3 text-md-end">
+            <a href="{{ url_for('enroll_administrators') }}" class="btn btn-outline-primary rounded-pill ms-2">
+                <i class="bi bi-plus-lg me-2"></i>Enroll New Administrator
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="m-3">
+    <table class="table table-striped table-hover">
+        <thead class="table-light align-middle">
+            <tr>
+                <th class="d-none" style="max-width: 400px; width: 400px;">ID</th>
+                <th></th>
+                <th>HCM ID</th>
+                <th>Email</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>SBU</th>
+                <th>Job Position</th>
+                <th>Role Type</th>
+                <th>Access Start Date</th>
+                <th>Access End Date</th>
+                <th>Status</th>
+                <th class="text-center" style="width: 50px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in administrators %}
+            <tr>
+                <td class="d-none">{{ admin.id }}</td>
+                <td class="text-center"><i class="bi bi-person-fill text-secondary"></i></td>
+                <td>{{ admin.hcm_id }}</td>
+                <td>{{ admin.email }}</td>
+                <td>{{ admin.full_name }}</td>
+                <td>{{ admin.username }}</td>
+                <td>{{ admin.sbu }}</td>
+                <td>{{ admin.job_position }}</td>
+                <td>{{ admin.role_type }}</td>
+                <td>{{ admin.access_start_date }}</td>
+                <td>{{ admin.access_end_date }}</td>
+                <td class="align-middle">{% if admin.status %}<span class="active-badge">Active</span>{% else %}<span
+                        class="inactive-badge">Inactive</span>{%
+                    endif %}
+                </td>
+                <td class="text-center">
+                    <div class="dropdown action-dots">
+                        <button class="btn action-dots p-0 border-0 bg-transparent" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical text-secondary" style="font-size: 20px;"></i>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ url_for('manage_admin_details', admin_id=admin.hcm_id) }}"><i
+                                        class="bi bi-pencil-square me-2"></i>Modify Access</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-trash3 me-2"></i> Delete</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    document.getElementById("searchModule").addEventListener("keyup", function () {
+        let input = this.value.toLowerCase();
+        let table = document.querySelector("table tbody");
+        let rows = table.querySelectorAll("tr");
+
+        rows.forEach(function (row) {
+            let text = row.innerText.toLowerCase();
+
+            if (text.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>
+{% endblock %}
