@@ -4,6 +4,10 @@ WORKDIR /app
 
 COPY . /app
 
+# Install Google Artifact Registry auth helper
+RUN pip install --no-cache-dir keyrings.google-artifactregistry-auth
+
+# Install dependencies (now authenticated via Cloud Build + keyring)
 RUN pip install --no-cache-dir \
     --extra-index-url https://us-west1-python.pkg.dev/pgc-dma-dev-sandbox/rasp-repo/simple/ \
     -r requirements.txt
