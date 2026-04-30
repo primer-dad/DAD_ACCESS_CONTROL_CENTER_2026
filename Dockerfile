@@ -4,13 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-# ✅ Install Artifact Registry auth support FIRST
-RUN pip install --no-cache-dir keyrings.google-artifactregistry-auth
-
-# ✅ Then install your dependencies
-RUN pip install --no-cache-dir \
-    --extra-index-url https://us-west1-python.pkg.dev/pgc-dma-dev-sandbox/rasp-repo/simple/ \
-    -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8080
 

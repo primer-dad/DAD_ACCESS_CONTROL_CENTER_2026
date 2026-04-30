@@ -1,10 +1,29 @@
 steps:
-  - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/dad-control-api", "."]
+  # Authenticate pip with Artifact Registry
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud auth application-default print-access-token > /workspace/token.txt
 
+  # Build Docker image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/$PROJECT_ID/dad-control-api",
+        "--build-arg",
+        "TOKEN=$(cat /workspace/token.txt)",
+        ".",
+      ]
+
+  # Push image
   - name: gcr.io/cloud-builders/docker
     args: ["push", "gcr.io/$PROJECT_ID/dad-control-api"]
 
+  # Deploy Cloud Run
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
     args:
